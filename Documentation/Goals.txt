@@ -1,0 +1,51 @@
+Next Steps
+My personal needs to move forward after the basic functions are working for the library are:
+
+·       Procedure for building a node
+
+·       Procedure for firmware update creation and deployment to an installed node
+
+·       Understanding all the supported LCC protocols exposed at the application level, i.e. consumer/producer event handling, requesting/responding to status/state requests, time/fast clock messages
+
+I am working on two nodes to control my engine maintenance facilities. These two nodes need to keep each other aware of their respective states.
+
+The first node has a touch screen interface for the fascia which displays the turntable and roundhouse doors. The interface allows the user to select a track to which the turntable will align or select a door to toggle open or closed. Lighting on the turntable and in the roundhouse may also be controlled. The first node controls the stepper motor of the turntable as well as the lights on the turntable.
+
+The second node controls the servo motors that open and close the roundhouse doors. It also controls the lights in the building.
+
+The screen display on the first node needs to indicate if a given light is on or off. It also needs to indicate if a door is open or closed. The status handshaking required is not currently supported in the Single Thread library.
+
+Another node that I have started on is a simple fast clock display using a neopixel 8x32 matrix. I may want to start using a fastclock in my operating sessions and wanted a clock I could put up. If it works out, I may want this to be WiFi rather than CAN. Or there may be better solutions. It is early days on my thinking, right now it is just a toy project.
+
+I have deployed a NeoPixel node on my layout that uses the Single Thread library. The use of flash memory for CDI storage and changes is not a problem as states are not stored in NVM and the CDI is not actively changed. There is little reason for firmware updates. But, I would update to a full featured implementation if available. I do intend to deploy more of these nodes to control all of my structure and scenery lighting. While it would be possible [I think] to use this board to control signaling, that would be quite a lot of programming. One could utilize one core for LCC and aspect processing and the second core for NeoPixel driving. I happily leave BO, Turnouts, and Signaling to RRCirKits products.
+
+Thoughts on LCC Node building guidance and possible example applications.
+Basic Node
+For each HW platform or one that compiles selectively to the board used in the IDE, this node would validate compilation and node function.
+
+·       All the basic node identification functions
+
+·       Event creation and handling for consumer and producer functions
+
+·       CDI creation
+
+·       CDI update handling, i.e. changes made in the CDI panel are handled and stored
+
+·       Firmware update handling
+
+Servo Node
+Basic Node functions plus example servo support:
+
+·       Servo parameter definition within CDI
+
+·       Servo event handling and driving
+
+Fastclock Node
+Basic Node functions plus example fast clock protocol interaction.
+
+Sensor Node
+Basic Node functions plus example sensor support:
+
+·       Sensor parameter definition within CDI
+
+·       State/status event handling
