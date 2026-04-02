@@ -13,15 +13,15 @@
         <group>
             <name>Node ID</name>
             <description>User-provided description of the node</description>
-            <string size="62">
+            <string size="63">
                 <name>Node Name</name>
             </string>
-            <string size="63">
+            <string size="64">
                 <name>Node Description</name>
             </string>
         </group>
     </segment>
-    <segment origin="125" space="253">
+    <segment origin="127" space="253">
         <name>Reset Control</name>
         <description>Controls Actions at Next Board Reset. Reloading User or Factory Defaults</description>
         <int size="1">
@@ -43,7 +43,7 @@
             </map>
         </int>
     </segment>
-    <segment origin="126" space="253">
+    <segment origin="128" space="253">
         <name>Attributes</name>
         <int size="1">
             <name>Number of Strings</name>
@@ -92,7 +92,7 @@
             </hints>
         </int>
     </segment>
-    <segment origin="146" space="253">
+    <segment origin="148" space="253">
         <name>Controls</name>
         <description>Use these to control groupings of individual LEDs across all active strings.</description>
         <!-- Tab 1=all, 2=street, 3=exterior, 4=business, 5=residential, 6=secondary -->
@@ -140,7 +140,7 @@
             </int>
         </group>
     </segment>
-    <segment origin="266" space="253">
+    <segment origin="268" space="253">
         <name>Strings</name>
         <description>Parameters for the lighting area NeoPixel strings</description>
         <group replication="4">

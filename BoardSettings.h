@@ -58,12 +58,17 @@
 #define SERVO_ADDRESS 0x40
 // #define EEPROM_ADDRESS 0x50
 #define STORAGE_ADDR 0x50  // 0x50 is the default address!
-#define STOR_WIRE Wire1     // make Wire1 or Wire
 
+#define STOR_WIRE Wire1     // make Wire1 or Wire
 #define I2C_SDA  26           // pin to use
 #define I2C_SCL  27           // pin to use
-#define I2C2_SDA  4           // pin to use
-#define I2C2_SCL  5           // pin to use
+
+// #define STOR_WIRE Wire     // make Wire1 or Wire
+
+// #define I2C_SDA  4           // pin to use
+// #define I2C_SCL  5           // pin to use
+// #define I2C2_SDA  4           // pin to use
+// #define I2C2_SCL  5           // pin to use
 #define NeoPixel_PinA 2           // pin to use for the board interface
 #define NeoPixel_PinB 6           // pin to use for the board interface
 #define NeoPixel_PinC 7           // pin to use for the board interface

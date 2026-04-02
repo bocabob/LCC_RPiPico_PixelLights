@@ -36,8 +36,8 @@
 typedef struct{
   // Memory space 253, origin NODE_ADDR
   struct {           
-    char node_name[62];
-    char node_description[63];
+    char node_name[63];
+    char node_description[64];
   } nodeid;
    // Memory space 253, origin RESET_CONTROL_ADDR
   struct {                             
