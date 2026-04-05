@@ -56,7 +56,7 @@
 
 
     /** @brief Stored callback interface pointer; set by _initialize(). */
-static interface_protocol_config_mem_operations_handler_t* _interface;
+static interface_protocol_config_mem_operations_handler_t *_interface;
 
     /**
      * @brief Stores the callback interface.  Call once at startup.
@@ -88,7 +88,7 @@ void ProtocolConfigMemOperationsHandler_initialize(const interface_protocol_conf
      *
      * @return Pointer to user_address_space_info_t, or NULL.
      */
-static const user_address_space_info_t* _decode_to_space_definition(openlcb_statemachine_info_t *statemachine_info, uint8_t space_offset) {
+static const user_address_space_info_t *_decode_to_space_definition(openlcb_statemachine_info_t *statemachine_info, uint8_t space_offset) {
 
     switch (*statemachine_info->incoming_msg_info.msg_ptr->payload[space_offset]) {
 
@@ -531,9 +531,19 @@ void ProtocolConfigMemOperationsHandler_freeze(openlcb_statemachine_info_t *stat
     config_mem_operations_request_info.operations_func = _interface->operations_request_freeze;
     config_mem_operations_request_info.space_info = _decode_to_space_definition(statemachine_info, 2);
 
+#ifdef OPENLCB_COMPILE_FIRMWARE
+    bool _is_firmware_space = (config_mem_operations_request_info.space_info != NULL &&
+                               config_mem_operations_request_info.space_info->address_space == CONFIG_MEM_SPACE_FIRMWARE);
+    bool _phase2 = statemachine_info->openlcb_node->state.openlcb_datagram_ack_sent;
+
+    if (_is_firmware_space && _phase2 && _interface->cleanup_before_handoff)
+        _interface->cleanup_before_handoff();
+#endif
+
     _handle_operations_request(statemachine_info, &config_mem_operations_request_info);
 
 }
+
 
     /** @brief Dispatch Reset/Reboot command.
      *
@@ -562,6 +572,11 @@ void ProtocolConfigMemOperationsHandler_reset_reboot(openlcb_statemachine_info_t
 
     // No datagram ACK — Initialization Complete is the acknowledgment
     statemachine_info->outgoing_msg_info.valid = false;
+
+#ifdef OPENLCB_COMPILE_FIRMWARE
+    if (_interface->cleanup_before_handoff)
+        _interface->cleanup_before_handoff();
+#endif
 
     config_mem_operations_request_info.operations_func(statemachine_info, &config_mem_operations_request_info);
 

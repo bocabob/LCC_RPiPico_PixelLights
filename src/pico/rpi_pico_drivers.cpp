@@ -104,7 +104,7 @@ static bool timer_unhandled_tick = false;
 
 void _handle_timer_tick(void) {
 
-  OpenLcb_100ms_timer_tick();
+  OpenLcbConfig_100ms_timer_tick();
 
 }
 
@@ -353,10 +353,15 @@ void RPiPicoDrivers_unlock_shared_resources(void) {
   // Resume the CAN Rx thread
   RPiPicoCanDriver_resume_can_rx();
 
-  if (timer_unhandled_tick) {
+  // Always re-enable the timer -- the new OpenLcbConfig_100ms_timer_tick() only
+  // increments a counter in the ISR (no protocol work), so lock_shared_resources
+  // disables it only to prevent a partial-count race.  It must be unconditionally
+  // restored here; without this the fast lock/unlock cycles in OpenLcbConfig_run()
+  // keep timer_enabled false indefinitely, starving the 100ms tick counter and
+  // preventing on_100ms_timer callbacks from ever firing.
+  timer_enabled = true;
 
-    // Resume the 100ms Timer here
-    timer_enabled = true;
+  if (timer_unhandled_tick) {
 
     timer_unhandled_tick = false;
     _handle_timer_tick();

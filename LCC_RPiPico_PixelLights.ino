@@ -152,13 +152,13 @@ void setup() {
   RPiPicoDriver_setup();
 
   CanConfig_initialize(&can_config);
-  OpenLcb_initialize(&openlcb_config);
+  OpenLcbConfig_initialize(&openlcb_config);
 
   Callbacks_initialize();
 
   Serial.println("Creating Node.....");
 
-  OpenLcbUserConfig_node_id = OpenLcb_create_node(NODE_ID, &OpenLcbUserConfig_node_parameters);
+  OpenLcbUserConfig_node_id = OpenLcbConfig_create_node(NODE_ID, &OpenLcbUserConfig_node_parameters);
   // do this after initialization or the I2C will not be initialized
 
   _check_for_nvm_initialization();
@@ -254,7 +254,7 @@ void loop() {
 
   RPiPicoCanDriver_process_receive();
 
-  OpenLcb_run();
+  OpenLcbConfig_run();
 }
 
 // ==== Loop Two for node function processes ==========================

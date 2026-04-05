@@ -44,6 +44,7 @@
 #define __OPENLCB_OPENLCB_TYPES__
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __has_include
@@ -79,8 +80,8 @@
   #include "openlcb_user_config.h"
 #endif
 
-#ifdef	__cplusplus
-  extern "C" {
+#ifdef __cplusplus
+extern "C" {
 #endif /* __cplusplus */
 
     /**
@@ -122,6 +123,19 @@
 #endif
 #if USER_DEFINED_STREAM_BUFFER_DEPTH < 1
 #error "USER_DEFINED_STREAM_BUFFER_DEPTH must be >= 1 to avoid a zero-length array"
+#endif
+
+    /** @brief Maximum bytes in a single stream data frame */
+#ifndef USER_DEFINED_STREAM_BUFFER_LEN
+#define USER_DEFINED_STREAM_BUFFER_LEN               256
+#endif
+
+    /** @brief Maximum concurrent active streams across all nodes */
+#ifndef USER_DEFINED_MAX_CONCURRENT_ACTIVE_STREAMS
+#define USER_DEFINED_MAX_CONCURRENT_ACTIVE_STREAMS   1
+#endif
+#if USER_DEFINED_MAX_CONCURRENT_ACTIVE_STREAMS < 1
+#error "USER_DEFINED_MAX_CONCURRENT_ACTIVE_STREAMS must be >= 1 to avoid a zero-length array"
 #endif
 
     /** @brief Maximum number of virtual nodes that can be allocated */
@@ -223,10 +237,10 @@
 #define LEN_SNIP_SOFTWARE_VERSION_BUFFER 21
 
     /** @brief SNIP user-assigned name field length (including null) */
-#define LEN_SNIP_USER_NAME_BUFFER 64
+#define LEN_SNIP_USER_NAME_BUFFER 63
 
     /** @brief SNIP user description field length (including null) */
-#define LEN_SNIP_USER_DESCRIPTION_BUFFER 62
+#define LEN_SNIP_USER_DESCRIPTION_BUFFER 64
 
     /** @brief Total SNIP user data size (name + description) */
 #define LEN_SNIP_USER_DATA (LEN_SNIP_USER_NAME_BUFFER + LEN_SNIP_USER_DESCRIPTION_BUFFER)
@@ -605,7 +619,7 @@
         uint8_t low_address_space;
         char description[LEN_CONFIG_MEM_OPTIONS_DESCRIPTION];
 
-    } user_configuration_options;
+    } user_configuration_options_t;
 
         /** @brief Properties of a single configuration memory address space. */
     typedef struct {
@@ -632,7 +646,7 @@
         uint64_t protocol_support;              /**< Protocol Support Indicator bits */
         uint8_t consumer_count_autocreate;
         uint8_t producer_count_autocreate;
-        user_configuration_options configuration_options;
+        user_configuration_options_t configuration_options;
         user_address_space_info_t address_space_configuration_definition; /**< Space 0xFF */
         user_address_space_info_t address_space_all;                     /**< Space 0xFE */
         user_address_space_info_t address_space_config_memory;           /**< Space 0xFD */

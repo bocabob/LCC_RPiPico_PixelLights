@@ -38,8 +38,10 @@
      * @see MemoryConfigurationS.pdf
      */
 
+// This is a guard condition so that contents of this file are not included
+// more than once.
 #ifndef __OPENLCB_PROTOCOL_CONFIG_MEM_OPERATIONS_HANDLER__
-#define    __OPENLCB_PROTOCOL_CONFIG_MEM_OPERATIONS_HANDLER__
+#define __OPENLCB_PROTOCOL_CONFIG_MEM_OPERATIONS_HANDLER__
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -88,6 +90,9 @@ typedef struct {
         /** @brief Optional — Handle Get Unique ID reply. */
     void (*operations_request_get_unique_id_reply)(openlcb_statemachine_info_t *statemachine_info, config_mem_operations_request_info_t *config_mem_operations_request_info);
 
+        /** @brief Optional — Tear down peripherals before freeze or reboot. Called automatically by the library before dispatching freeze or reboot if not NULL. */
+    void (*cleanup_before_handoff)(void);
+
         /** @brief Optional — Handle Freeze command. */
     void (*operations_request_freeze)(openlcb_statemachine_info_t *statemachine_info, config_mem_operations_request_info_t *config_mem_operations_request_info);
 
@@ -106,7 +111,7 @@ typedef struct {
 
 } interface_protocol_config_mem_operations_handler_t;
 
-#ifdef    __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
@@ -247,9 +252,9 @@ extern "C" {
     extern void ProtocolConfigMemOperationsHandler_request_reserve_lock(openlcb_statemachine_info_t *statemachine_info, config_mem_operations_request_info_t *config_mem_operations_request_info);
 
 
-#ifdef    __cplusplus
+#ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif    /* __OPENLCB_PROTOCOL_CONFIG_MEM_OPERATIONS_HANDLER__ */
+#endif /* __OPENLCB_PROTOCOL_CONFIG_MEM_OPERATIONS_HANDLER__ */
 

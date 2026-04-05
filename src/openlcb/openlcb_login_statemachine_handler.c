@@ -79,7 +79,7 @@ static const interface_openlcb_login_message_handler_t *_interface;
     * @param interface Pointer to interface structure containing callback functions
     * @endverbatim
     */
-void OpenLcbLoginMessageHandler_initialize(const interface_openlcb_login_message_handler_t *interface) {
+void OpenLcbLoginStatemachineHandler_initialize(const interface_openlcb_login_message_handler_t *interface) {
 
     _interface = interface;
 
@@ -99,7 +99,7 @@ void OpenLcbLoginMessageHandler_initialize(const interface_openlcb_login_message
     * @param statemachine_info Pointer to state machine info containing node and message buffer
     * @endverbatim
     */
-void OpenLcbLoginMessageHandler_load_initialization_complete(openlcb_login_statemachine_info_t *statemachine_info) {
+void OpenLcbLoginStatemachineHandler_load_initialization_complete(openlcb_login_statemachine_info_t *statemachine_info) {
 
     uint16_t mti = MTI_INITIALIZATION_COMPLETE;
 
@@ -151,12 +151,13 @@ void OpenLcbLoginMessageHandler_load_initialization_complete(openlcb_login_state
     * @param statemachine_info Pointer to state machine info containing node and message buffer
     * @endverbatim
     */
-void OpenLcbLoginMessageHandler_load_producer_event(openlcb_login_statemachine_info_t *statemachine_info) {
+void OpenLcbLoginStatemachineHandler_load_producer_event(openlcb_login_statemachine_info_t *statemachine_info) {
 
     // No producers - skip to consumers
 
     if ((statemachine_info->openlcb_node->producers.count == 0) && (statemachine_info->openlcb_node->producers.range_count == 0)) {
 
+        statemachine_info->openlcb_node->producers.enumerator.running = false;
         statemachine_info->openlcb_node->state.run_state = RUNSTATE_LOAD_CONSUMER_EVENTS;
 
         statemachine_info->outgoing_msg_info.valid = false;
@@ -257,12 +258,13 @@ void OpenLcbLoginMessageHandler_load_producer_event(openlcb_login_statemachine_i
     * @param statemachine_info Pointer to state machine info containing node and message buffer
     * @endverbatim
     */
-void OpenLcbLoginMessageHandler_load_consumer_event(openlcb_login_statemachine_info_t *statemachine_info) {
+void OpenLcbLoginStatemachineHandler_load_consumer_event(openlcb_login_statemachine_info_t *statemachine_info) {
 
     // No consumers - we are done
 
     if ((statemachine_info->openlcb_node->consumers.count == 0) && (statemachine_info->openlcb_node->consumers.range_count == 0)) {
 
+        statemachine_info->openlcb_node->consumers.enumerator.running = false;
         statemachine_info->openlcb_node->state.run_state = RUNSTATE_LOGIN_COMPLETE;
 
         statemachine_info->outgoing_msg_info.valid = false;
