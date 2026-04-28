@@ -5,10 +5,31 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+// ProjectConfig.h is the single source of truth for board selection.
+// It is included here so that ALL translation units (.cpp files) get the same
+// defines through their BoardSettings.h include chain.
+#include "ProjectConfig.h"
+
 #define ARDUINO_COMPATIBLE
 
 // --------------------------------------------
-// Select ONE of these for Non-volitile Memory Storage
+//  Board hardware selection
+//  Set in ProjectConfig.h — do not define here or in individual .cpp files.
+// --------------------------------------------
+#if defined(LCC_BOARD_NODE_V25)
+  #include "board_configs/BoardPins_Node_v25.h"
+#elif defined(LCC_BOARD_NODE_V26)
+  #include "board_configs/BoardPins_Node_v26.h"
+#elif defined(LCC_BOARD_NODE_V27)
+  #include "board_configs/BoardPins_Node_v27.h"
+#elif defined(LCC_BOARD_NODE_V28)
+  #include "board_configs/BoardPins_Node_v28.h"
+#else
+  #error "No board version defined. Set LCC_BOARD_NODE_V25/V26/V27/V28 in ProjectConfig.h"
+#endif
+
+// --------------------------------------------
+// Select ONE of these for Non-volatile Memory Storage
 // --------------------------------------------
 // #define USE_INTERNAL_FLASH_STORAGE
 #define USE_I2C_STORAGE
@@ -51,33 +72,19 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 //  Define a valid (and free) I2C address, 0x60 is the default.
-// 
-// #define I2C_ADDRESS 0x60 
-// #define KEYPAD_ADDRESS 0x20
-// #define DISPLAY_ADDRESS 0x3C
+//
+// #define I2C_ADDRESS 0x60
 #define SERVO_ADDRESS 0x40
 // #define EEPROM_ADDRESS 0x50
 #define STORAGE_ADDR 0x50  // 0x50 is the default address!
 
-#define STOR_WIRE Wire1     // make Wire1 or Wire
-#define I2C_SDA  26           // pin to use
-#define I2C_SCL  27           // pin to use
-
-// #define STOR_WIRE Wire     // make Wire1 or Wire
-
-// #define I2C_SDA  4           // pin to use
-// #define I2C_SCL  5           // pin to use
-// #define I2C2_SDA  4           // pin to use
-// #define I2C2_SCL  5           // pin to use
-#define NeoPixel_PinA 2           // pin to use for the board interface
-#define NeoPixel_PinB 6           // pin to use for the board interface
-#define NeoPixel_PinC 7           // pin to use for the board interface
-#define NeoPixel_PinD 3           // pin to use for the board interface
-
+// STOR_WIRE, I2C_SDA, I2C_SCL, NeoPixel_Pin*,
+// MCP2517_*, BLUE/GOLD_BUTTON_PIN
+// are all defined in the board_configs/BoardPins_*.h file selected above.
 
 /////////////////////////////////////////////////////////////////////////////////////
 //  Define the LED blink rates for fast and slow blinking in milliseconds.
-// 
+//
 //  The LED will alternative on/off for these durations.
 #define FREQUENCY 100
 
@@ -89,27 +96,8 @@
 //  Enable debug outputs if required during troubleshooting.
 #define NODE_DEBUG true  // uncomment for debug
 
-//——————————————————————————————————————————————————————————————————————————————
-//  MCP2517 connections: adapt theses settings to your design
-//  As hardware SPI is used, you should select pins that support SPI functions.
-//  This code is designed to use SPI
-//  If standard SPI, SPI2 pins are not used then define them
-//    SCK input of MCP2517 is connected to pin #32
-//    SDI input of MCP2517 is connected to pin #0
-//    SDO output of MCP2517 is connected to pin #1
-//  CS input of MCP2517 should be connected to a digital output port
-//  INT output of MCP2517 should be connected to a digital input port, with interrupt capability
-
-#define MCP2517_SPI  SPI   // SPI port to use for MCP2517/8
-
-#define MCP2517_CS  17   // CS input of MCP2517/8
-#define MCP2517_INT 20  // INT output of MCP2517/8
-#define MCP2517_SCK 18  // SCK input of MCP2517/8
-#define MCP2517_SDI 19  // SI input of MCP2517/8
-#define MCP2517_SDO 16  // SO output of MCP2517/8
-
 // NeoPixel defines
-
+// NeoPixel_PinA/B/C/D are defined in the board header above.
 #define MAX_STRINGS 4 // also defined in NPlights.cpp and program .ino files and need to update event table
 #define MAX_LIGHTS 20 // also defined in NPlights.cpp and program .ino files
 

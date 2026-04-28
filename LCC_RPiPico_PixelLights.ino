@@ -54,7 +54,7 @@
 
 #include "NPlights.h"
 
-#define NODE_ID 0x050101019408      // 05 01 01 01 94 ** range assigned to Bob Gamble / Southern Piedmont
+#define NODE_ID 0x050101019428      // 05 01 01 01 94 ** range assigned to Bob Gamble / Southern Piedmont
 
 static const can_config_t can_config = {
     .transmit_raw_can_frame  = &RPiPicoCanDriver_transmit_raw_can_frame,
