@@ -340,6 +340,117 @@ uint16_t RPiPicoDrivers_config_mem_write(openlcb_node_t *openlcb_node, uint32_t 
   //-----------------------------------------------
 }
 
+//-----------------------------------------------
+// Unbounded NVM read/write for the protected identity region above
+// CONFIG_MEM_SIZE (see LCC_NODE_STANDARD.md §7.1). Deliberately skips the
+// CONFIG_MEM_SIZE bounds check that RPiPicoDrivers_config_mem_read/write
+// enforce — that check is what keeps the config-memory wipe commands ('c'/'r')
+// from reaching this region, so do NOT add a bounds check here, and do NOT
+// use these functions for CDI-driven configuration memory.
+//-----------------------------------------------
+uint16_t RPiPicoDrivers_nvm_raw_read(uint32_t address, uint8_t *buffer, uint16_t count) {
+
+#if defined(USE_INTERNAL_FLASH_STORAGE) && defined(ARDUINO_COMPATIBLE)
+
+  EEPROM.begin(I2C_DEVICESIZE);
+
+  for (int i = 0; i < count; i++) {
+    buffer[i] = EEPROM.read(address + i);
+  }
+
+  EEPROM.end();
+
+  return count;
+
+#endif  // defined(USE_INTERNAL_FLASH_STORAGE) && defined(ARDUINO_COMPATIBLE)
+
+#if defined(USE_I2C_STORAGE) && defined(ARDUINO_COMPATIBLE)
+  #if defined(EXTERNAL_EEPROM)
+    #if defined(USE_TILLAART)
+      uint16_t bytes_read = i2c_eeprom.readBlock(address, buffer, count);
+    #else
+      bool bytes_read = i2c_eeprom.read(address, count, buffer);
+    #endif
+  #elif defined(EXTERNAL_FRAM)
+    #if defined(USE_TILLAART)
+      uint16_t bytes_read = count;
+      i2c_eeprom.read(address, buffer, count);
+    #else
+      bool bytes_read = i2c_eeprom.read(address, count, buffer);
+    #endif
+  #endif
+
+  #if defined(USE_TILLAART)
+    if (bytes_read != count) {
+      Serial.println("NVM identity region read failed.");
+      return 0;
+    }
+  #else
+    if (!bytes_read) {
+      Serial.println("NVM identity region read failed.");
+      return 0;
+    }
+  #endif
+
+  return count;
+#endif  // defined(USE_I2C_STORAGE) && defined(ARDUINO_COMPATIBLE)
+
+  return 0;
+}
+
+uint16_t RPiPicoDrivers_nvm_raw_write(uint32_t address, uint8_t *buffer, uint16_t count) {
+
+#if defined(USE_INTERNAL_FLASH_STORAGE) && defined(ARDUINO_COMPATIBLE)
+
+  EEPROM.begin(I2C_DEVICESIZE);
+
+  for (int i = 0; i < count; i++) {
+    EEPROM.write(address + i, buffer[i]);
+  }
+
+  if (!EEPROM.end()) {
+    Serial.println("NVM identity region write failed.");
+    return 0;
+  }
+
+  return count;
+
+#endif  // defined(USE_INTERNAL_FLASH_STORAGE) && defined(ARDUINO_COMPATIBLE)
+
+#if defined(USE_I2C_STORAGE) && defined(ARDUINO_COMPATIBLE)
+  #if defined(EXTERNAL_EEPROM)
+    #if defined(USE_TILLAART)
+      int bytes_written = i2c_eeprom.writeBlock(address, buffer, count);
+    #else
+      bool bytes_written = i2c_eeprom.write(address, count, buffer);
+    #endif
+  #elif defined(EXTERNAL_FRAM)
+    #if defined(USE_TILLAART)
+      int bytes_written = count;
+      i2c_eeprom.write(address, buffer, count);
+    #else
+      bool bytes_written = i2c_eeprom.write(address, count, buffer);
+    #endif
+  #endif
+
+  #if defined(USE_TILLAART) && defined(EXTERNAL_EEPROM)
+    if (bytes_written != 0) {
+      Serial.println("NVM identity region write failed.");
+      return 0;
+    }
+  #else
+    if (!bytes_written) {
+      Serial.println("NVM identity region write failed.");
+      return 0;
+    }
+  #endif
+
+  return count;
+#endif  // defined(USE_I2C_STORAGE) && defined(ARDUINO_COMPATIBLE)
+
+  return 0;
+}
+
 void RPiPicoDrivers_lock_shared_resources(void) {
 
   // Pause the CAN Rx thread

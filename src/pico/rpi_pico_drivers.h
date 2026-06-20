@@ -53,6 +53,12 @@ extern "C" {
 
   extern uint16_t RPiPicoDrivers_config_mem_write(openlcb_node_t *openlcb_node, uint32_t address, uint16_t count, configuration_memory_buffer_t *buffer);
 
+  // Unbounded NVM read/write for the protected identity region above
+  // CONFIG_MEM_SIZE — see LCC_NODE_STANDARD.md §7.1. Do not use for CDI
+  // configuration memory.
+  extern uint16_t RPiPicoDrivers_nvm_raw_read(uint32_t address, uint8_t *buffer, uint16_t count);
+  extern uint16_t RPiPicoDrivers_nvm_raw_write(uint32_t address, uint8_t *buffer, uint16_t count);
+
   extern void RPiPicoDrivers_lock_shared_resources(void);
 
   extern void RPiPicoDrivers_unlock_shared_resources(void);
