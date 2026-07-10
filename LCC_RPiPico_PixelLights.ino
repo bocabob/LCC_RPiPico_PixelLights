@@ -59,7 +59,7 @@
 // Fallback used only until the protected NVM identity block is provisioned
 // (see NodeIdentity.h / LCC_NODE_STANDARD.md §7.1). Provision a permanent ID
 // with the 'N' serial command rather than relying on this for new boards.
-#define NODE_ID_DEFAULT 0x050101019422      // 05 01 01 01 94 ** range assigned to Bob Gamble / Southern Piedmont
+#define NODE_ID_DEFAULT 0x0501010194FF      // 05 01 01 01 94 ** range assigned to Bob Gamble / Southern Piedmont
 
 static const can_config_t can_config = {
     .transmit_raw_can_frame  = &RPiPicoCanDriver_transmit_raw_can_frame,
@@ -87,6 +87,37 @@ static const openlcb_config_t openlcb_config = {
     .on_consumed_event_pcer          = &Callbacks_on_consumed_event_pcer,
     .on_broadcast_time_changed       = &Callbacks_on_broadcast_time_time_changed,
 };
+
+// Factory-reset gesture: hold Blue + Gold buttons for 2s at boot to wipe and
+// reinitialize configuration memory to CDI defaults. Does NOT touch the
+// protected NVM identity region above CONFIG_MEM_SIZE (§7.1) — node ID
+// survives this reset, same as it survives the 'r'/'i' serial commands.
+// No-op if BLUE_BUTTON_PIN/GOLD_BUTTON_PIN are unavailable on this board's
+// active breakout combo (shared with another function) — see NodeConfig.h.
+void _check_factory_reset_gesture(void) {
+#if defined(BLUE_BUTTON_PIN) && defined(GOLD_BUTTON_PIN)
+  pinMode(BLUE_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(GOLD_BUTTON_PIN, INPUT_PULLUP);
+
+  if (digitalRead(BLUE_BUTTON_PIN) != LOW || digitalRead(GOLD_BUTTON_PIN) != LOW) {
+    return;  // not held — normal boot
+  }
+
+  Serial.println("Blue+Gold held at boot — hold 2s to wipe and reinitialize NVM (release to cancel)...");
+  uint32_t startMs = millis();
+  while (digitalRead(BLUE_BUTTON_PIN) == LOW && digitalRead(GOLD_BUTTON_PIN) == LOW) {
+    if (millis() - startMs >= 2000) {
+      Serial.println("Wiping configuration memory to factory defaults...");
+      ConfigMemHelper_reset_config_mem();
+      ConfigMemHelper_reset_and_write_default(OpenLcbUserConfig_node_id);
+      Serial.println("NVM wiped and reinitialized. Continuing boot...");
+      return;
+    }
+    delay(20);
+  }
+  Serial.println("Released early — factory reset cancelled.");
+#endif
+}
 
 void _check_for_nvm_initialization(void) {
 
@@ -172,6 +203,8 @@ void setup() {
   OpenLcbUserConfig_node_id = OpenLcbConfig_create_node(node_id, &OpenLcbUserConfig_node_parameters);
   // do this after initialization or the I2C will not be initialized
 
+  _check_factory_reset_gesture();
+
   _check_for_nvm_initialization();
 
   // Read the NVM into the local data structures
@@ -254,12 +287,13 @@ void loop() {
       case 'q':
         OpenLcbApplicationBroadcastTime_send_query(OpenLcbUserConfig_node_id, BROADCAST_TIME_ID_DEFAULT_FAST_CLOCK);
       break;
-      case 't':
+      case 't': {
         broadcast_clock_state_t* clock = OpenLcbApplicationBroadcastTime_get_clock(BROADCAST_TIME_ID_DEFAULT_FAST_CLOCK);
 
         // clock->is_running = true;
 
         printf("Current time: %02d:%02d\n", clock->time.hour, clock->time.minute);
+      }
       break;
       case 'N': {
         char hexbuf[13];
@@ -279,7 +313,16 @@ void loop() {
       case 'Y':
         if (NodeIdentity_provision_pending()) {
           if (NodeIdentity_confirm_provision()) {
-            Serial.println("Node identity written. Rebooting...");
+            // Config memory (including node-ID-based default event IDs) was
+            // written using whatever ID was active at the time — NODE_ID_DEFAULT
+            // if this is a fresh board provisioned before its first boot's
+            // defaults were ever written. Wipe to 0xFF (fresh) so
+            // _check_for_nvm_initialization() rewrites the defaults next boot
+            // using the just-provisioned real ID. Safe: the identity block
+            // itself lives in the protected NVM region above CONFIG_MEM_SIZE,
+            // untouched by this reset.
+            ConfigMemHelper_reset_config_mem();
+            Serial.println("Node identity written. Rebooting to regenerate event IDs from the new node ID...");
             delay(100);
             rp2040.reboot();
           } else {

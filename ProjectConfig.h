@@ -19,5 +19,5 @@
 //#define LCC_BOARD_NODE_V26  // v2.6 board (identical pins to v2.5)
 //#define LCC_BOARD_NODE_V27  // v2.7 board (no dedicated NeoPixel pins)
 //#define LCC_BOARD_NODE_V28  // v2.8 board (CAN/I2C layout changed)
-#define LCC_BOARD_NODE_V29  // v2.9 board (no dedicated servo, expanded I/O headers)
-//#define LCC_BOARD_NODE_V30  // v3.0 board (current generic NODE board)
+// #define LCC_BOARD_NODE_V29  // v2.9 board (no dedicated servo, expanded I/O headers)
+#define LCC_BOARD_NODE_V30  // v3.0 board (current generic NODE board)

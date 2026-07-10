@@ -5,18 +5,19 @@
  * Use the IOx_PINy defines from the active board config (via BoardSettings.h).
  * Set any unconnected function to UNUSED_PIN (127).
  *
- * Available signal pins by connector (v2.9):
+ * Available signal pins by connector (v3.0):
  *   IO1: IO1_PIN1(gp8)  IO1_PIN2(gp9)  IO1_PIN3(gp10) IO1_PIN4(gp11)
  *        IO1_PIN7(gp12) IO1_PIN8(gp13) IO1_PIN9(gp14) IO1_PIN10(gp15)
  *
  *   IO2: IO2_PIN1(gp16) IO2_PIN2(gp17) IO2_PIN3(gp18) IO2_PIN4(gp19)
- *        IO2_PIN7(gp20) IO2_PIN8(gp21) IO2_PIN9(gp22) IO2_PIN10(gp26)
+ *        IO2_PIN7(gp20) IO2_PIN8(gp21) IO2_PIN9(gp22) IO2_PIN10(gp5, also Blue Button)
  *
- *   IO3: IO3_PIN1(gp26) IO3_PIN2(gp27) IO3_PIN5(gp28)  [analog-capable]
+ *   IO3: IO3_PIN1(gp26) IO3_PIN2(gp27) IO3_PIN5(gp28, also Gold Button)  [analog-capable]
  *
- *   HDR: HDR_PIN1(gp5)
- *
- * Note: gp26 is shared between IO2_PIN10 and IO3_PIN1 — assign to only one function.
+ * Note: on v3.0, IO2_PIN10 (gp5) and IO3_PIN5 (gp28) double as the Blue and
+ * Gold buttons — a NodeConfig.h assignment to either pin makes that button
+ * unavailable. gp26 is no longer shared between IO2 and IO3 (that changed
+ * from v2.9); IO3_PIN1 is free to assign independently.
  */
 
 #ifndef NODE_CONFIG_H
@@ -25,11 +26,12 @@
 // --------------------------------------------
 //  NeoPixel strings
 //  Assign each active string to a connector signal pin.
+//  v3.0 board: NeoPixel strings A-D on I/O-1 pins 1-4 (gp8-gp11).
 // --------------------------------------------
-#define NeoPixel_PinA   UNUSED_PIN
-#define NeoPixel_PinB   UNUSED_PIN
-#define NeoPixel_PinC   UNUSED_PIN
-#define NeoPixel_PinD   UNUSED_PIN
+#define NeoPixel_PinA   IO1_PIN1   // gp8
+#define NeoPixel_PinB   IO1_PIN2   // gp9
+#define NeoPixel_PinC   IO1_PIN3   // gp10
+#define NeoPixel_PinD   IO1_PIN4   // gp11
 
 // --------------------------------------------
 //  Buttons
